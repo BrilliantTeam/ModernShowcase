@@ -43,7 +43,7 @@ public class Showcase {
 			xRotation = con.get(spacedKey(block,"rotX"), PersistentDataType.FLOAT);
 			yRotation = con.get(spacedKey(block,"rotY"), PersistentDataType.FLOAT);
 			autoRotateSpeed = con.get(spacedKey(block,"auto_rotate"), PersistentDataType.FLOAT);
-			if(autoRotateSpeed>0)
+			if(autoRotateSpeed!=0)
 				rotatesInstance.put(block,this);
 		}
 			
