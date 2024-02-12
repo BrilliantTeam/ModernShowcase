@@ -19,17 +19,22 @@ import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import dr.dru.gui.GUILib;
+import me.dru.showcase.utils.CoreProtectShowcaseAdapter;
+import net.coreprotect.CoreProtect;
+import net.coreprotect.CoreProtectAPI;
 
 public class ModernShowcase extends JavaPlugin {
 	private static ModernShowcase instance;
 	private static HashMap<String,Lang> langs = new HashMap<>();
-	
+	private CoreProtectAPI coreProtect;
 	@Override
 	public void onEnable() {
 		instance = this;
+		coreProtect = searchCoreProtect();
 		registerLangs();
 		registerEvents();
 		registerCommands();
@@ -44,7 +49,30 @@ public class ModernShowcase extends JavaPlugin {
 	public static ModernShowcase getInstance() {
 		return instance;
 	}
-	
+	public CoreProtectShowcaseAdapter getCoreProtect() {
+		return coreProtect != null ? new CoreProtectShowcaseAdapter(coreProtect) : null;
+	}
+	private CoreProtectAPI searchCoreProtect() {
+        Plugin plugin = getServer().getPluginManager().getPlugin("CoreProtect");
+
+        // Check that CoreProtect is loaded
+        if (plugin == null || !(plugin instanceof CoreProtect)) {
+            return null;
+        }
+
+        // Check that the API is enabled
+        CoreProtectAPI CoreProtect = ((CoreProtect) plugin).getAPI();
+        if (CoreProtect.isEnabled() == false) {
+            return null;
+        }
+
+        // Check that a compatible version of the API is loaded
+        if (CoreProtect.APIVersion() < 9) {
+            return null;
+        }
+        Bukkit.getLogger().info("[ModerenShowcase] CoreProtect detected, hooked successfully.");
+        return CoreProtect;
+}
 	private void registerBstats() {
 		int pluginId = 20936;
         new Metrics(this, pluginId);

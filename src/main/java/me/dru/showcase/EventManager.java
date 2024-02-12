@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -23,25 +24,30 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.event.world.EntitiesUnloadEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.util.Transformation;
-import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 
+
 import me.dru.showcase.block.Showcase;
+import me.dru.showcase.utils.CoreProtectShowcaseAdapter;
 
 public class EventManager implements Listener {
 	ModernShowcase plugin;
-	
+	CoreProtectShowcaseAdapter coreProtect;
 	public EventManager(ModernShowcase plugin) {
 		this.plugin = plugin;
+		coreProtect = plugin.getCoreProtect();
 		Bukkit.getWorlds().forEach(w->w.getEntities().forEach(ent->{
 			if(ent.getType()==EntityType.ITEM_DISPLAY&&Showcase.isShowcase(ent.getLocation()))
 				Showcase.rotatesInstance.put(ent.getLocation().getBlock(),Showcase.get(ent.getLocation()));
@@ -51,7 +57,7 @@ public class EventManager implements Listener {
 	@EventHandler
 	public void onCraft(PrepareItemCraftEvent e) {
 		if(e.getRecipe()!=null&&e.getRecipe() instanceof ShapedRecipe&&((ShapedRecipe)e.getRecipe()).getKey().getNamespace().equalsIgnoreCase("ModernShowcase")) {
-			e.getInventory().setResult(ModernShowcase.getInstance().getShowcaseItem(ModernShowcase.getLang((Player)e.getView().getPlayer()), e.getInventory().getResult().getType()));
+			e.getInventory().setResult(plugin.getShowcaseItem(ModernShowcase.getLang((Player)e.getView().getPlayer()), e.getInventory().getResult().getType()));
 		}
 	}
 	
@@ -70,17 +76,22 @@ public class EventManager implements Listener {
 			showcase.despawn();
 		}
 	}
+	
+		
 	PlayerInteractEvent dependCheck;
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onInteract(PlayerInteractEvent e) {
 		if(e!=dependCheck&&e.getHand()==EquipmentSlot.HAND&&e.getAction()==Action.RIGHT_CLICK_BLOCK&&Showcase.isShowcase(e.getClickedBlock().getLocation())) {
+			
 			Showcase showcase = Showcase.get(e.getClickedBlock().getLocation());
-			if(e.getPlayer().isSneaking()&&e.getItem()!=null&&Showcase.isShowcase(e.getItem()))
+			if(e.getPlayer().isSneaking()&&e.getItem()!=null&&Showcase.isShowcase(e.getItem())) {
 				return;
-			
+			}
 			e.setCancelled(true);
-			
-			if(e.getItem()==null&&!e.getPlayer().isSneaking()) {
+			if((coreProtect!=null&&coreProtect.isInspecting(e.getPlayer())))
+				return;
+			//coreProtect.look
+			if((e.getItem()==null||e.getItem().getAmount()==0)&&!e.getPlayer().isSneaking()) {
 				ShowcaseUI.preview(e.getPlayer(), showcase);
 				return;
 			}
@@ -90,29 +101,37 @@ public class EventManager implements Listener {
 			PlayerInteractEvent interact = new PlayerInteractEvent(e.getPlayer(), Action.RIGHT_CLICK_BLOCK,e.getItem(), e.getClickedBlock(), e.getBlockFace(), e.getHand());
 			dependCheck = interact;
 			Bukkit.getPluginManager().callEvent(interact);
-			e.getClickedBlock().setType(origianl);
-			
+				
 			if(e.getPlayer().isSneaking()) {
 				if(interact.useInteractedBlock()!=Result.DENY) 
 					ShowcaseUI.open(e.getPlayer(), showcase);
 				else 
 					ShowcaseUI.preview(e.getPlayer(), showcase);
+					
+				e.getClickedBlock().setType(origianl);
 				return;
 			} 
 			if(e.getItem()!=null&&interact.useInteractedBlock()!=Result.DENY) {
+				if(coreProtect!=null)
+					coreProtect.logShowcase(e.getPlayer(),((Chest)e.getClickedBlock().getState()),showcase.getItem(),e.getItem());
 				if(e.getPlayer().getInventory().firstEmpty()>=0)
 					e.getPlayer().getInventory().addItem(showcase.getItem());
 				else
 					e.getPlayer().getWorld().dropItem(e.getPlayer().getLocation(), showcase.getItem(),i->i.setPickupDelay(0));
+
 				showcase.setItem(e.getItem());	
 				e.getPlayer().getInventory().setItem(EquipmentSlot.HAND, new ItemStack(Material.AIR));
 				e.getPlayer().getWorld().playSound(e.getPlayer().getLocation(),Sound.ITEM_ARMOR_EQUIP_LEATHER,1f,1f);
+				
 			} else {
 				ShowcaseUI.preview(e.getPlayer(),showcase);
 			}
+			e.getClickedBlock().setType(origianl);
 		}
 	}
+
 	
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onEntityExplode(EntityExplodeEvent e) { 
 		for(Block b : e.blockList())
