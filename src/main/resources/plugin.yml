@@ -1,6 +1,6 @@
 name: ModernShowcase
 main: me.dru.showcase.ModernShowcase
-version: 1.2
+version: 1.1.1
 description: "A good showcase plugin"
 author: Dru_TNT
 softdepend: [CoreProtect]

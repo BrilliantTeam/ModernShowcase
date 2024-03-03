@@ -81,7 +81,7 @@ public class EventManager implements Listener {
 	PlayerInteractEvent dependCheck;
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onInteract(PlayerInteractEvent e) {
-		if(e!=dependCheck&&e.getHand()==EquipmentSlot.HAND&&e.getAction()==Action.RIGHT_CLICK_BLOCK&&Showcase.isShowcase(e.getClickedBlock().getLocation())) {
+		if(e!=dependCheck&&e.getHand()!=EquipmentSlot.OFF_HAND&&e.getAction()==Action.RIGHT_CLICK_BLOCK&&Showcase.isShowcase(e.getClickedBlock().getLocation())) {
 			
 			Showcase showcase = Showcase.get(e.getClickedBlock().getLocation());
 			if(e.getPlayer().isSneaking()&&e.getItem()!=null&&Showcase.isShowcase(e.getItem())) {
@@ -95,13 +95,12 @@ public class EventManager implements Listener {
 				ShowcaseUI.preview(e.getPlayer(), showcase);
 				return;
 			}
-			
 			Material origianl = e.getClickedBlock().getType();
 			e.getClickedBlock().setType(Material.CHEST);
 			PlayerInteractEvent interact = new PlayerInteractEvent(e.getPlayer(), Action.RIGHT_CLICK_BLOCK,e.getItem(), e.getClickedBlock(), e.getBlockFace(), e.getHand());
 			dependCheck = interact;
 			Bukkit.getPluginManager().callEvent(interact);
-				
+
 			if(e.getPlayer().isSneaking()) {
 				if(interact.useInteractedBlock()!=Result.DENY) 
 					ShowcaseUI.open(e.getPlayer(), showcase);
@@ -127,6 +126,7 @@ public class EventManager implements Listener {
 				ShowcaseUI.preview(e.getPlayer(),showcase);
 			}
 			e.getClickedBlock().setType(origianl);
+
 		}
 	}
 
@@ -205,7 +205,7 @@ public class EventManager implements Listener {
 	public static void rotate() {
 		rot+=0.1f;
 		Showcase.rotatesInstance.values().forEach(display->{
-			if(display==null)
+			if(display==null||display.getItemDisplay()==null)
 				return;
 			Transformation transfom = display.getItemDisplay().getTransformation();
 			transfom.getLeftRotation().set(new AxisAngle4f( (float)Math.PI*rot*display.getAutoRotateSpeed(), new Vector3f(0, 1, 0)));
