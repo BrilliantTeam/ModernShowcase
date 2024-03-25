@@ -97,11 +97,15 @@ public class EventManager implements Listener {
 			}
 			Material origianl = e.getClickedBlock().getType();
 			e.getClickedBlock().setType(Material.CHEST);
+			
+			boolean sneak = e.getPlayer().isSneaking();
+			if(sneak)
+				e.getPlayer().setSneaking(false);
+			e.getPlayer().setSneaking(false);
 			PlayerInteractEvent interact = new PlayerInteractEvent(e.getPlayer(), Action.RIGHT_CLICK_BLOCK,e.getItem(), e.getClickedBlock(), e.getBlockFace(), e.getHand());
 			dependCheck = interact;
 			Bukkit.getPluginManager().callEvent(interact);
-
-			if(e.getPlayer().isSneaking()) {
+			if(sneak) {
 				if(interact.useInteractedBlock()!=Result.DENY) 
 					ShowcaseUI.open(e.getPlayer(), showcase);
 				else 
@@ -109,7 +113,8 @@ public class EventManager implements Listener {
 					
 				e.getClickedBlock().setType(origianl);
 				return;
-			} 
+			}
+			
 			if(e.getItem()!=null&&interact.useInteractedBlock()!=Result.DENY) {
 				if(coreProtect!=null)
 					coreProtect.logShowcase(e.getPlayer(),((Chest)e.getClickedBlock().getState()),showcase.getItem(),e.getItem());
