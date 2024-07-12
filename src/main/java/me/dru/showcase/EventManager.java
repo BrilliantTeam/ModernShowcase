@@ -1,5 +1,6 @@
 package me.dru.showcase;
 
+import me.dru.showcase.utils.ScheduleUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -212,9 +213,12 @@ public class EventManager implements Listener {
 		Showcase.rotatesInstance.values().forEach(display->{
 			if(display==null||display.getItemDisplay()==null)
 				return;
-			Transformation transfom = display.getItemDisplay().getTransformation();
-			transfom.getLeftRotation().set(new AxisAngle4f( (float)Math.PI*rot*display.getAutoRotateSpeed(), new Vector3f(0, 1, 0)));
-			display.getItemDisplay().setTransformation(transfom);
+
+			ScheduleUtil.ENTITY.runTask(ModernShowcase.getInstance(), display.getItemDisplay(), () -> {
+				Transformation transfom = display.getItemDisplay().getTransformation();
+				transfom.getLeftRotation().set(new AxisAngle4f( (float)Math.PI*rot*display.getAutoRotateSpeed(), new Vector3f(0, 1, 0)));
+				display.getItemDisplay().setTransformation(transfom);
+			});
 		});
 	}
 }
