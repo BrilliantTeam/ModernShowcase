@@ -133,7 +133,7 @@ public class Showcase {
 		Location loc =  item.getLocation();
 		loc.setYaw(x);
 		loc.setPitch(y);
-		item.teleportAsync(loc);
+		item.teleport(loc);
 		PersistentDataContainer con = getDataContainer();
 		con.set(spacedKey(block,"rotX"), PersistentDataType.FLOAT, x);
 		con.set(spacedKey(block,"rotY"), PersistentDataType.FLOAT, y);
