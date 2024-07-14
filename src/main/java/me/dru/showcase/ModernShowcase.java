@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import me.dru.showcase.utils.ScheduleUtil;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -42,7 +41,7 @@ public class ModernShowcase extends JavaPlugin {
 		registerCrafting();
 		registerBstats();
 		GUILib.register(this);
-		ScheduleUtil.GLOBAL.runTaskTimer(instance, ()-> EventManager.rotate(), 2, 2);
+		Bukkit.getScheduler().runTaskTimer(instance, ()->EventManager.rotate(), 2, 2);
 		Bukkit.getLogger().info("ModernShowcase is enabled.");
 		
 	}
