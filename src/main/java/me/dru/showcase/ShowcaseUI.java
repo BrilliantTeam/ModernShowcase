@@ -18,19 +18,22 @@ import dr.dru.gui.component.panel.ButtonPanel;
 import dr.dru.gui.component.panel.IntegerLeverPanel;
 import dr.dru.gui.component.position.UIRegion;
 import me.dru.showcase.block.Showcase;
+import me.dru.showcase.config.Config;
 
 public class ShowcaseUI {
 	
 	public static void open(Player p, Showcase showcase) {
 		Lang lang = ModernShowcase.getLang(p);
 		GUI g = new GUI(lang.settingTitle, 9);
+		Config config = ModernShowcase.Config();
 		if(showcase.getItemDisplay()==null) {
 			showcase.despawn();
 			return;
 		}
+		
 		g.addPanel(UIRegion.single(1,0), new IntegerLeverPanel(new StatefulIcon(pp->{
 			return GUILib.getItem(Material.PUFFERFISH, lang.scale, showcase.getSize(), lang.scaleDesc);
-		}), showcase.getSize(), 1, 10, value->showcase.setSize(value)));
+		}), showcase.getSize(), config.minSize, config.maxSize, value->showcase.setSize(value)));
 
 		g.addPanel(UIRegion.single(2,0), new ButtonPanel(new StatefulIcon(pp->GUILib.getItem(Material.COMPASS,lang.toggleFixed,1,lang.current.replace("{0}", showcase.isFixedBillboard() ? lang.enable : lang.disable))), e->{
 			showcase.togglgBillboard();

@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.ItemDisplay;
 import org.bukkit.plugin.Plugin;
 
 import java.util.concurrent.TimeUnit;
@@ -18,7 +19,20 @@ public class ScheduleUtil {
             isFolia = false;
         }
     }
+    
+    public static boolean isFolia() {
+    	return isFolia;
+    }
 
+	public static void teleportAsync(Entity item, Location loc) {
+		if(isFolia) {
+			item.teleportAsync(loc);
+		} else {
+			item.teleport(loc);
+		}
+		
+	}
+	
     public static class GLOBAL {
         public static void runTask(Plugin plugin, Runnable task) {
             if (isFolia) {
@@ -145,4 +159,5 @@ public class ScheduleUtil {
             }
         }
     }
+
 }

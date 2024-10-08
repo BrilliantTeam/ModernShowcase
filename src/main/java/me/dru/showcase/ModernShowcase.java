@@ -24,6 +24,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import dr.dru.gui.GUILib;
+import me.dru.showcase.config.Config;
 import me.dru.showcase.utils.CoreProtectShowcaseAdapter;
 import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
@@ -32,10 +33,12 @@ public class ModernShowcase extends JavaPlugin {
 	private static ModernShowcase instance;
 	private static HashMap<String,Lang> langs = new HashMap<>();
 	private CoreProtectAPI coreProtect;
+	public Config config;
 	@Override
 	public void onEnable() {
 		instance = this;
 		coreProtect = searchCoreProtect();
+		registerConfig();
 		registerLangs();
 		registerEvents();
 		registerCommands();
@@ -45,6 +48,19 @@ public class ModernShowcase extends JavaPlugin {
 		ScheduleUtil.GLOBAL.runTaskTimer(instance, ()-> EventManager.rotate(), 2, 2);
 		Bukkit.getLogger().info("ModernShowcase is enabled.");
 		
+	}
+
+	@Override
+	public void onDisable() {
+		config.save();
+	}
+	
+	private void registerConfig() {
+		config = new Config();
+	}
+	
+	public static Config Config() {
+		return instance.config;
 	}
 
 	public static ModernShowcase getInstance() {

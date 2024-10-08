@@ -18,6 +18,9 @@ import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 
 import me.dru.showcase.ModernShowcase;
+import me.dru.showcase.ShowcaseUI;
+import me.dru.showcase.config.Config;
+import me.dru.showcase.utils.ScheduleUtil;
 
 /**
  * Showcase represent a block with showcase data
@@ -133,7 +136,7 @@ public class Showcase {
 		Location loc =  item.getLocation();
 		loc.setYaw(x);
 		loc.setPitch(y);
-		item.teleportAsync(loc);
+		ScheduleUtil.teleportAsync(item,loc);
 		PersistentDataContainer con = getDataContainer();
 		con.set(spacedKey(block,"rotX"), PersistentDataType.FLOAT, x);
 		con.set(spacedKey(block,"rotY"), PersistentDataType.FLOAT, y);
@@ -200,9 +203,11 @@ public class Showcase {
 	}
 
 	public void setSize(int size) {
+		Config config = ModernShowcase.Config();
+		size = Math.max(Math.min(size, config.maxSize), config.minSize);
 		this.size = size;
 		Transformation transform = item.getTransformation();
-		transform.getScale().set(size/8f, size/8f, size/8f);
+		transform.getScale().set(size/config.sizeInterval, size/config.sizeInterval, size/config.sizeInterval);
 		item.setTransformation(transform);
 		
 		PersistentDataContainer con = getDataContainer();
