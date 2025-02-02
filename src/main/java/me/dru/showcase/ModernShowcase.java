@@ -24,6 +24,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import dr.dru.gui.GUILib;
+import me.dru.showcase.block.Showcase;
 import me.dru.showcase.config.Config;
 import me.dru.showcase.utils.CoreProtectShowcaseAdapter;
 import net.coreprotect.CoreProtect;
@@ -45,7 +46,7 @@ public class ModernShowcase extends JavaPlugin {
 		registerCrafting();
 		registerBstats();
 		GUILib.register(this);
-		ScheduleUtil.GLOBAL.runTaskTimer(instance, ()-> EventManager.rotate(), 2, 2);
+		ScheduleUtil.GLOBAL.runTaskTimer(instance, ()-> EventManager.rotate(), config.rotatePeroid, config.rotatePeroid);
 		Bukkit.getLogger().info("ModernShowcase is enabled.");
 		
 	}
@@ -53,8 +54,15 @@ public class ModernShowcase extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		config.save();
+		disableInstances();
 	}
 	
+	private void disableInstances() {
+		Showcase.rotatesInstance.forEach((b,show)->{
+			show.getItemDisplay().setVisibleByDefault(false);
+		});
+	}
+
 	private void registerConfig() {
 		config = new Config();
 	}
@@ -175,6 +183,7 @@ public class ModernShowcase extends JavaPlugin {
 			zh_tw.yawRotate = "§f§l水平旋轉（X 軸）";
 			zh_tw.pitchRotate = "§f§l垂直旋轉（Y 軸）";
 			zh_tw.auto_rotate = "§f§l自動旋轉速度";
+			zh_tw.displayitems = "§f§l展示物品";
 			zh_tw.current = "§6當前設定：{0}";
 			zh_tw.desc = Arrays.asList(
 				    zh_tw.current,
@@ -199,7 +208,6 @@ public class ModernShowcase extends JavaPlugin {
 					"§7使用說明：",
 					"§7    ",
 					"§7    §8空手 §7+ §6右鍵§7：§f查看展示物品  ",
-					"§7    §a手持物品 §7+ §6右鍵§7：§f替換展示物品    ",
 					"§7    §e蹲下 §7+ §6右鍵§7：§f編輯展示櫃設定    ",
 					"§7    ");
 			zh_tw.glass = "玻璃"; 
@@ -220,6 +228,9 @@ public class ModernShowcase extends JavaPlugin {
 			zh_tw.PURPLE_STAINED_GLASS="紫色玻璃";
 			zh_tw.MAGENTA_STAINED_GLASS="洋紅色玻璃";
 			zh_tw.PINK_STAINED_GLASS="粉色玻璃";
+			zh_tw.placedLimitReach = "此區塊的展示櫃數量已到達上限！";
+			zh_tw.itemBlacklist = "你沒有足夠權限放入此物品！";
+			zh_tw.slotLimitReach = "你不能在展示櫃裡放入超過{0}個物品！";
 			zh_tw.save();
 			
 			Lang zh_cn = new Lang("zh_cn");
@@ -230,6 +241,7 @@ public class ModernShowcase extends JavaPlugin {
 			zh_cn.yawRotate = "§f§l水平旋转（X 轴）";
 			zh_cn.pitchRotate = "§f§l垂直旋转（Y 轴）";
 			zh_cn.auto_rotate = "§f§l自动旋转速度";
+			zh_cn.displayitems = "§f§l显示项目";
 			zh_cn.current = "§6当前设定：{0}";
 			zh_cn.desc = Arrays.asList(
 					zh_cn.current,
@@ -249,12 +261,11 @@ public class ModernShowcase extends JavaPlugin {
 			zh_cn.disable = "§c停用";
 
 			zh_cn.showcase = "展示柜"; 
-
+		
 			zh_cn.showcaseDesc = Arrays.asList(
 					"§7使用说明：",
 					"§7    ",
 					"§7    §8空手 §7+ §6右键§7：§f查看展示物品  ",
-					"§7    §a手持物品 §7+ §6右键§7：§f替换展示物品    ",
 					"§7    §e蹲下 §7+ §6右键§7：§f编辑展示柜设定    ",
 					"§7    ");
 			zh_cn.glass = "玻璃"; 
@@ -275,6 +286,9 @@ public class ModernShowcase extends JavaPlugin {
 			zh_cn.PURPLE_STAINED_GLASS="紫色玻璃";
 			zh_cn.MAGENTA_STAINED_GLASS="洋红色玻璃";
 			zh_cn.PINK_STAINED_GLASS="粉色玻璃";
+			zh_cn.placedLimitReach = "此区块的展示柜数量已到达上限";
+			zh_cn.itemBlacklist = "你没有足够权限放入此物件！";
+			zh_cn.slotLimitReach = "你不能在展示櫃裡放入超過{0}個物品！";
 			zh_cn.save();
 			langs.put("en_us", new Lang("en_us"));
 			langs.put("zh_tw", zh_tw);

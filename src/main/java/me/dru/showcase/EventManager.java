@@ -9,6 +9,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
@@ -65,8 +66,16 @@ public class EventManager implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlace(BlockPlaceEvent e) {
 		if(!e.isCancelled()&&e.getItemInHand()!=null&&Showcase.isShowcase(e.getItemInHand())) {
+			int limit = ModernShowcase.Config().placedPerChunkLimit;
+			if(limit>=0&&Showcase.getPlacedAmountOnChunk(e.getBlock().getChunk())>=limit) {
+				e.getPlayer().sendMessage(ModernShowcase.getLang(e.getPlayer()).placedLimitReach);
+				e.setCancelled(true);
+				return;
+			}
+			Showcase.addPlacedAmountOnChunk(e.getBlock().getChunk(), 1);
 			Location loc = e.getBlock().getLocation().subtract(e.getPlayer().getLocation());
-			Showcase.get(e.getBlock().getLocation()).spawn(Math.abs(loc.getX())<Math.abs(loc.getZ()),new ItemStack(Material.ITEM_FRAME));		
+			Showcase show = Showcase.get(e.getBlock().getLocation());
+			show.spawnHolder(Math.abs(loc.getX())<Math.abs(loc.getZ()),new ItemStack(Material.ITEM_FRAME));
 		}
 	}
 	
@@ -74,6 +83,7 @@ public class EventManager implements Listener {
 	public void onBreak(BlockBreakEvent e) {
 		if(!e.isCancelled()&&Showcase.isShowcase(e.getBlock().getLocation())) {
 			Showcase showcase = Showcase.get(e.getBlock().getLocation());
+			Showcase.addPlacedAmountOnChunk(e.getBlock().getChunk(), -1);
 			showcase.despawn();
 		}
 	}
@@ -83,20 +93,32 @@ public class EventManager implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onInteract(PlayerInteractEvent e) {
 		if(e!=dependCheck&&e.getHand()!=EquipmentSlot.OFF_HAND&&e.getAction()==Action.RIGHT_CLICK_BLOCK&&Showcase.isShowcase(e.getClickedBlock().getLocation())) {
+			e.setCancelled(true);
 			
+			if((coreProtect!=null&&coreProtect.isInspecting(e.getPlayer())))
+				return;
 			Showcase showcase = Showcase.get(e.getClickedBlock().getLocation());
-			if(e.getPlayer().isSneaking()&&e.getItem()!=null&&Showcase.isShowcase(e.getItem())) {
+			
+			Material origianl = e.getClickedBlock().getType();
+			e.getClickedBlock().setType(Material.CHEST);
+			PlayerInteractEvent interact = new PlayerInteractEvent(e.getPlayer(), Action.RIGHT_CLICK_BLOCK,e.getItem(), e.getClickedBlock(), e.getBlockFace(), e.getHand());
+			dependCheck = interact;
+			Bukkit.getPluginManager().callEvent(interact);
+			
+			if(!e.getPlayer().isSneaking()||
+					interact.useInteractedBlock()==Result.DENY) { 
+				ShowcaseUI.preview(e.getPlayer(), showcase);
+			} else 
+				ShowcaseUI.open(e.getPlayer(), showcase);
+			e.getClickedBlock().setType(origianl);
+			
+			/*
+			 * if(e.getPlayer().isSneaking()&&e.getItem()!=null&&Showcase.isShowcase(e.getItem())) {
 				return;
 			}
 			e.setCancelled(true);
-			if((coreProtect!=null&&coreProtect.isInspecting(e.getPlayer())))
-				return;
-			//coreProtect.look
-			if((e.getItem()==null||e.getItem().getAmount()==0)&&!e.getPlayer().isSneaking()) {
-				ShowcaseUI.preview(e.getPlayer(), showcase);
-				return;
-			}
-			Material origianl = e.getClickedBlock().getType();
+			
+			 * Material origianl = e.getClickedBlock().getType();
 			e.getClickedBlock().setType(Material.CHEST);
 			
 			boolean sneak = e.getPlayer().isSneaking();
@@ -132,6 +154,7 @@ public class EventManager implements Listener {
 				ShowcaseUI.preview(e.getPlayer(),showcase);
 			}
 			e.getClickedBlock().setType(origianl);
+			*/
 
 		}
 	}
@@ -201,23 +224,30 @@ public class EventManager implements Listener {
 	public void onUnload(EntitiesUnloadEvent e) {
 		for(Entity ent : e.getEntities()) {
 			if(ent.getType()==EntityType.ITEM_DISPLAY&&Showcase.isShowcase(ent.getLocation())) {
+				//Showcase.get(ent.getLocation());
 				Showcase.rotatesInstance.remove(ent.getLocation().getBlock());
 			}	
 		}
 		
 	}
 	
-	private static float rot =0;
+	public static int rotTimes =0;
 	public static void rotate() {
-		rot+=0.1f;
+		rotTimes+=1;
 		Showcase.rotatesInstance.values().forEach(display->{
 			if(display==null||display.getItemDisplay()==null)
 				return;
-
+			float rot = ((float)rotTimes) /10f;
 			ScheduleUtil.ENTITY.runTask(ModernShowcase.getInstance(), display.getItemDisplay(), () -> {
-				Transformation transfom = display.getItemDisplay().getTransformation();
+				if(rotTimes%50==0) {
+					int number = rotTimes/50;
+					display.setItemDisplay(number);
+				}
+				ItemDisplay item = display.getItemHolder();
+				Transformation transfom = item.getTransformation();
 				transfom.getLeftRotation().set(new AxisAngle4f( (float)Math.PI*rot*display.getAutoRotateSpeed(), new Vector3f(0, 1, 0)));
-				display.getItemDisplay().setTransformation(transfom);
+				item.setTransformation(transfom);
+				
 			});
 		});
 	}

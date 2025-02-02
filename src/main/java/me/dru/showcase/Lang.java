@@ -20,6 +20,8 @@ public class Lang {
 	public String yawRotate = "§r§fYaw Direction";
 	public String pitchRotate = "§r§fPitch Direction";
 	public String auto_rotate = "§r§fAuto Rotation Speed";
+	public String displayitems = "§r§fDisplay Items";
+
 	public List<String> desc = Arrays.asList(
 			current,
 			" ",
@@ -56,6 +58,10 @@ public class Lang {
 	public String PURPLE_STAINED_GLASS="Purple Glass";
 	public String MAGENTA_STAINED_GLASS="Magenta Glass";
 	public String PINK_STAINED_GLASS="Pink Glass";
+
+	public String placedLimitReach = "The showcase limit for this chunk has been reached!";
+	public String itemBlacklist = "You don't have permission to put in this item!";
+	public String slotLimitReach = "You can't put more than {0} items in the showcase!";
 	
 	private File file;
 	private FileConfiguration config;
@@ -70,6 +76,7 @@ public class Lang {
 		yawRotate  = config.getString("yaw_direction",yawRotate);
 		pitchRotate  = config.getString("pitch_direction",pitchRotate);
 		auto_rotate  = config.getString("auto-rotation_speed",auto_rotate);
+		displayitems = config.getString("display_items",displayitems);
 		if(config.contains("adjust_description"))
 			desc  = config.getStringList("adjust_description");
 		if(config.contains("scale_description"))
@@ -100,11 +107,16 @@ public class Lang {
 		PURPLE_STAINED_GLASS=config.getString("purple_glass",PURPLE_STAINED_GLASS);
 		MAGENTA_STAINED_GLASS=config.getString("magenta_glass",MAGENTA_STAINED_GLASS);
 		PINK_STAINED_GLASS=config.getString("pink_glass",PINK_STAINED_GLASS);
+		
+		placedLimitReach = config.getString("placed_limit_reach",placedLimitReach);
+		itemBlacklist = config.getString("item_blacklist",itemBlacklist);
+		slotLimitReach = config.getString("slot_limit_reach", slotLimitReach);
 		save();
 	}
 
 	public void save() {
 		config.set("showcase_settings", settingTitle);
+		config.set("display_items", displayitems);
 		config.set("sacle_size",scale);
 		config.set("current_value",current);
 		config.set("toggle_fixed",toggleFixed);
@@ -139,6 +151,10 @@ public class Lang {
 		config.set("purple_glass",PURPLE_STAINED_GLASS);
 		config.set("magenta_glass",MAGENTA_STAINED_GLASS);
 		config.set("pink_glass",PINK_STAINED_GLASS);
+
+		config.set("placed_limit_reach", placedLimitReach);
+		config.set("item_blacklist", itemBlacklist);
+		config.set("slot_limit_reach", slotLimitReach);
 		try {
 			config.save(file);
 		} catch (IOException e) {
