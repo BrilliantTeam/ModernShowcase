@@ -9,6 +9,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
+
+import net.md_5.bungee.api.chat.BaseComponent;
 
 public class Lang { 
 	public String defaultLang = "en_us";
@@ -62,6 +65,7 @@ public class Lang {
 	public String placedLimitReach = "The showcase limit for this chunk has been reached!";
 	public String itemBlacklist = "You don't have permission to put in this item!";
 	public String slotLimitReach = "You can't put more than {0} items in the showcase!";
+	public String noPlacePerms = "You don't have permission to place item showcase!";
 	
 	private File file;
 	private FileConfiguration config;
@@ -111,6 +115,7 @@ public class Lang {
 		placedLimitReach = config.getString("placed_limit_reach",placedLimitReach);
 		itemBlacklist = config.getString("item_blacklist",itemBlacklist);
 		slotLimitReach = config.getString("slot_limit_reach", slotLimitReach);
+		noPlacePerms = config.getString("no_place_permission",noPlacePerms);
 		save();
 	}
 
@@ -155,6 +160,8 @@ public class Lang {
 		config.set("placed_limit_reach", placedLimitReach);
 		config.set("item_blacklist", itemBlacklist);
 		config.set("slot_limit_reach", slotLimitReach);
+		config.set("no_place_permission", noPlacePerms);
+		
 		try {
 			config.save(file);
 		} catch (IOException e) {

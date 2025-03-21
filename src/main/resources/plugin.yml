@@ -1,6 +1,6 @@
 name: ModernShowcase
 main: me.dru.showcase.ModernShowcase
-version: 1.6.1.1
+version: 1.7
 folia-supported: true
 description: "A good showcase plugin"
 author: Dru_TNT
@@ -10,3 +10,13 @@ commands:
   ModernShowcase:
     description: "ModernShowcase management command"
     aliases: [ms,showcase]
+permissions:
+  modernshowcase.craft:
+     description: Allows you to craft showcase
+     default: true
+  modernshowcase.place:
+     description: Allows you to place showcase
+     default: true
+  modernshowcase.edit:
+     description: Allows you to edit showcase
+     default: true

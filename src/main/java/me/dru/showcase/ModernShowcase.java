@@ -231,6 +231,7 @@ public class ModernShowcase extends JavaPlugin {
 			zh_tw.placedLimitReach = "此區塊的展示櫃數量已到達上限！";
 			zh_tw.itemBlacklist = "你沒有足夠權限放入此物品！";
 			zh_tw.slotLimitReach = "你不能在展示櫃裡放入超過{0}個物品！";
+			zh_tw.noPlacePerms = "你沒有足夠權限放置展示櫃！";
 			zh_tw.save();
 			
 			Lang zh_cn = new Lang("zh_cn");
@@ -288,7 +289,8 @@ public class ModernShowcase extends JavaPlugin {
 			zh_cn.PINK_STAINED_GLASS="粉色玻璃";
 			zh_cn.placedLimitReach = "此区块的展示柜数量已到达上限";
 			zh_cn.itemBlacklist = "你没有足够权限放入此物件！";
-			zh_cn.slotLimitReach = "你不能在展示櫃裡放入超過{0}個物品！";
+			zh_cn.slotLimitReach = "你不能在展示柜里放入超过{0}个物品！";
+			zh_cn.noPlacePerms = "你没有足够权限放置展示柜！";
 			zh_cn.save();
 			langs.put("en_us", new Lang("en_us"));
 			langs.put("zh_tw", zh_tw);

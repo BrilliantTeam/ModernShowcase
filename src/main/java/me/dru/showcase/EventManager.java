@@ -59,13 +59,22 @@ public class EventManager implements Listener {
 	@EventHandler
 	public void onCraft(PrepareItemCraftEvent e) {
 		if(e.getRecipe()!=null&&e.getRecipe() instanceof ShapedRecipe&&((ShapedRecipe)e.getRecipe()).getKey().getNamespace().equalsIgnoreCase("ModernShowcase")) {
-			e.getInventory().setResult(plugin.getShowcaseItem(ModernShowcase.getLang((Player)e.getView().getPlayer()), e.getInventory().getResult().getType()));
+			if(e.getViewers().get(0).hasPermission("modernshowcase.craft"))
+				e.getInventory().setResult(plugin.getShowcaseItem(ModernShowcase.getLang((Player)e.getView().getPlayer()), e.getInventory().getResult().getType()));
+			else
+				e.getInventory().setResult(new ItemStack(Material.AIR));
 		}
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlace(BlockPlaceEvent e) {
 		if(!e.isCancelled()&&e.getItemInHand()!=null&&Showcase.isShowcase(e.getItemInHand())) {
+			if(!e.getPlayer().hasPermission("modernshowcase.place")) {
+				e.getPlayer().sendMessage(ModernShowcase.getLang(e.getPlayer()).noPlacePerms);
+				e.setCancelled(true);
+				return;
+			}
+				
 			int limit = ModernShowcase.Config().placedPerChunkLimit;
 			if(limit>=0&&Showcase.getPlacedAmountOnChunk(e.getBlock().getChunk())>=limit) {
 				e.getPlayer().sendMessage(ModernShowcase.getLang(e.getPlayer()).placedLimitReach);
@@ -106,7 +115,7 @@ public class EventManager implements Listener {
 			Bukkit.getPluginManager().callEvent(interact);
 			
 			if(!e.getPlayer().isSneaking()||
-					interact.useInteractedBlock()==Result.DENY) { 
+					interact.useInteractedBlock()==Result.DENY||!e.getPlayer().hasPermission("modernshowcase.edit")) { 
 				ShowcaseUI.preview(e.getPlayer(), showcase);
 			} else 
 				ShowcaseUI.open(e.getPlayer(), showcase);
@@ -235,10 +244,10 @@ public class EventManager implements Listener {
 	public static void rotate() {
 		rotTimes+=1;
 		Showcase.rotatesInstance.values().forEach(display->{
-			if(display==null||display.getItemDisplay()==null)
+			if(display==null||display.getItemHolder()==null)
 				return;
 			float rot = ((float)rotTimes) /10f;
-			ScheduleUtil.ENTITY.runTask(ModernShowcase.getInstance(), display.getItemDisplay(), () -> {
+			ScheduleUtil.ENTITY.runTask(ModernShowcase.getInstance(), display.getItemHolder(), () -> {
 				if(rotTimes%50==0) {
 					int number = rotTimes/50;
 					display.setItemDisplay(number);

@@ -66,10 +66,14 @@ public class Showcase {
 			
 			if(id!=null&&id.length()>1) {
 				ItemDisplay old = ((ItemDisplay)Bukkit.getEntity(UUID.fromString(id)));
-				spawnHolder(false, old.getItemStack(),false);
-				old.remove();
-				setSize(Math.max(1, con.get(spacedKey(block,"size"), PersistentDataType.INTEGER)));
-				setRotation(con.get(spacedKey(block,"rotX"), PersistentDataType.FLOAT), con.get(spacedKey(block,"rotY"), PersistentDataType.FLOAT));
+				if(old!=null) {
+					spawnHolder(false, old.getItemStack(),false);
+					old.remove();
+					setSize(Math.max(1, con.get(spacedKey(block,"size"), PersistentDataType.INTEGER)));
+					setRotation(con.get(spacedKey(block,"rotX"), PersistentDataType.FLOAT), con.get(spacedKey(block,"rotY"), PersistentDataType.FLOAT));	
+				} else 
+					despawn();
+				
 				//con.remove(spacedKey(block.getLocation()));
 			}
 		}
@@ -87,7 +91,7 @@ public class Showcase {
 			xRotation = con.get(spacedKey(block,"rotX"), PersistentDataType.FLOAT);
 			yRotation = con.get(spacedKey(block,"rotY"), PersistentDataType.FLOAT);
 			setItemDisplay(me.dru.showcase.EventManager.rotTimes);
-			if(con.has(spacedKey(block,"auto_rotate")))
+			if(con.has(spacedKey(block,"auto_rotate"),PersistentDataType.FLOAT))
 				autoRotateSpeed = con.get(spacedKey(block,"auto_rotate"), PersistentDataType.FLOAT);
 			tryRegisterMotion();
 		}
@@ -130,10 +134,13 @@ public class Showcase {
 	public ItemDisplay setItemDisplay(int idx) {
 
 		 List<UUID> items = Arrays.stream(item).filter(id->id!=null).toList();
+		 
 		 onDisplayItem = items.get(idx%items.size());
 
 		 ItemDisplay display = getItemHolder();
-		 display.setItemStack(getItemDisplay().getItemStack());
+		 //ERROR DEBUG will be null on showcase init
+		 if(getItemDisplay()!=null)
+			 display.setItemStack(getItemDisplay().getItemStack());
 		 return display;
 	}
 	
@@ -176,7 +183,7 @@ public class Showcase {
 		return (ItemDisplay) Bukkit.getEntity(item[slot]);
 	}
 	public Stream<ItemDisplay> getItemDisplays() {
-		return Arrays.stream(item).filter(id->id!=null).map(id->(ItemDisplay)Bukkit.getEntity(id));
+		return Arrays.stream(item).filter(id->id!=null).map(id->(ItemDisplay)Bukkit.getEntity(id)).filter(i->i!=null);
 	}
 	
 	private boolean loadItemDisplay() {
@@ -185,7 +192,7 @@ public class Showcase {
 		if(!con.has(key,PersistentDataType.STRING))
 			return false;
 		item = Arrays.stream(con.get(key, PersistentDataType.STRING)
-				.split("/")).map(id->id.isEmpty()? null : UUID.fromString(id)).collect(Collectors.toList()).toArray(new UUID[9]);
+				.split("/")).map(id->id.isEmpty()||Bukkit.getEntity(UUID.fromString(id))==null? null : UUID.fromString(id)).collect(Collectors.toList()).toArray(new UUID[9]);
 		return true;
 	}
 
@@ -197,7 +204,8 @@ public class Showcase {
 			if(!sb.isEmpty())
 				sb.append("/");
 			UUID id = item[i];
-			sb.append(id==null? "":id);
+			if(id!=null&&Bukkit.getEntity(item[i])!=null)
+				sb.append(id==null? "":id);
 		
 		}
 		
@@ -224,7 +232,7 @@ public class Showcase {
 	public static void addPlacedAmountOnChunk(Chunk chunk, int amount) {
 		PersistentDataContainer con = chunk.getPersistentDataContainer();
 		NamespacedKey key = new NamespacedKey(ModernShowcase.getInstance(), "placed_amount");
-		int total = (con.has(key) ? con.get(key, PersistentDataType.INTEGER) : 0) +amount;
+		int total = (con.has(key,PersistentDataType.INTEGER) ? con.get(key, PersistentDataType.INTEGER) : 0) +amount;
 		con.set(key, PersistentDataType.INTEGER, Math.max(total, 0));
 	}
 	public void spawnHolder(boolean north,ItemStack show) {
@@ -262,6 +270,8 @@ public class Showcase {
 		id.setInterpolationDuration(2*20);
 		id.setInterpolationDelay(2);
 		id.setVisibleByDefault(false);
+		//if(holder==null)
+		//	holder = id;
 		//if(item.size()==0) {
 		if(idx>=0) {
 			item[idx] = id.getUniqueId();
