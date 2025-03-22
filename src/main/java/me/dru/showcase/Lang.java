@@ -16,7 +16,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 public class Lang { 
 	public String defaultLang = "en_us";
 	public String settingTitle = "Showcase settings";
-	public String scale = "§r§fSacle Size";
+	public String scale = "§r§fScale Size";
 	public String current = ChatColor.GOLD+"Current: {0}";
 	public String toggleFixed = "§rToggle Fixed Display";
 	public String toggleGlass = "§rToggle Glass Display";
