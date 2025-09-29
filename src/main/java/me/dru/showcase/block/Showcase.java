@@ -86,7 +86,10 @@ public class Showcase {
 			size = Math.max(1, con.get(spacedKey(block,"size"), PersistentDataType.INTEGER));
 			xRotation = con.get(spacedKey(block,"rotX"), PersistentDataType.FLOAT);
 			yRotation = con.get(spacedKey(block,"rotY"), PersistentDataType.FLOAT);
-			zRotation = con.get(spacedKey(block,"rotZ"), PersistentDataType.FLOAT);
+			
+			if(con.has(spacedKey(block,"rotZ"),PersistentDataType.FLOAT))
+				zRotation = con.get(spacedKey(block,"rotZ"), PersistentDataType.FLOAT);
+			
 			setItemDisplay(me.dru.showcase.EventManager.rotTimes);
 			if(con.has(spacedKey(block,"auto_rotate"),PersistentDataType.FLOAT))
 				autoRotateSpeed = con.get(spacedKey(block,"auto_rotate"), PersistentDataType.FLOAT);
