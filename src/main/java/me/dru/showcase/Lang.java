@@ -22,6 +22,7 @@ public class Lang {
 	public String toggleGlass = "§rToggle Glass Display";
 	public String yawRotate = "§r§fYaw Direction";
 	public String pitchRotate = "§r§fPitch Direction";
+	public String zRotate = "§r§fRoll Direction";
 	public String auto_rotate = "§r§fAuto Rotation Speed";
 	public String displayitems = "§r§fDisplay Items";
 
@@ -79,6 +80,7 @@ public class Lang {
 		toggleGlass  = config.getString("toggle_glass",toggleGlass);
 		yawRotate  = config.getString("yaw_direction",yawRotate);
 		pitchRotate  = config.getString("pitch_direction",pitchRotate);
+		zRotate  = config.getString("roll_direction",zRotate);
 		auto_rotate  = config.getString("auto-rotation_speed",auto_rotate);
 		displayitems = config.getString("display_items",displayitems);
 		if(config.contains("adjust_description"))
@@ -128,6 +130,7 @@ public class Lang {
 		config.set("toggle_glass",toggleGlass);
 		config.set("yaw_direction",yawRotate);
 		config.set("pitch_direction",pitchRotate);
+		config.set("roll_direction",zRotate);
 		config.set("auto-rotation_speed",auto_rotate);
 		config.set("adjust_description",desc);
 		config.set("scale_description",scaleDesc );

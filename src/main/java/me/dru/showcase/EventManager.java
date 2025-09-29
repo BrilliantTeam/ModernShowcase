@@ -1,6 +1,9 @@
 package me.dru.showcase;
 
 import me.dru.showcase.utils.ScheduleUtil;
+
+import java.util.HashSet;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -119,7 +122,8 @@ public class EventManager implements Listener {
 				ShowcaseUI.preview(e.getPlayer(), showcase);
 			} else 
 				ShowcaseUI.open(e.getPlayer(), showcase);
-			e.getClickedBlock().setType(origianl);
+			if(e.getClickedBlock().getType()==Material.CHEST)
+				e.getClickedBlock().setType(origianl);
 			
 			/*
 			 * if(e.getPlayer().isSneaking()&&e.getItem()!=null&&Showcase.isShowcase(e.getItem())) {
@@ -231,12 +235,16 @@ public class EventManager implements Listener {
 	}
 	@EventHandler
 	public void onUnload(EntitiesUnloadEvent e) {
+		HashSet<Block> unload = new HashSet<>();
 		for(Entity ent : e.getEntities()) {
 			if(ent.getType()==EntityType.ITEM_DISPLAY&&Showcase.isShowcase(ent.getLocation())) {
-				//Showcase.get(ent.getLocation());
-				Showcase.rotatesInstance.remove(ent.getLocation().getBlock());
+				unload.add(ent.getLocation().getBlock());
 			}	
 		}
+		for(Block block : unload) {
+			Showcase.rotatesInstance.remove(block);	
+		}
+		
 		
 	}
 	

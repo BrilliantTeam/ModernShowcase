@@ -1,13 +1,10 @@
 package me.dru.showcase.block;
 
-import java.awt.Event;
-import java.time.Period;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
+import java.util.UUID;	
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,7 +17,6 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ItemDisplay;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Display.Billboard;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
@@ -30,7 +26,6 @@ import org.bukkit.util.Transformation;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 
-import dr.dru.gui.listener.EventManager;
 import me.dru.showcase.ModernShowcase;
 import me.dru.showcase.config.Config;
 import me.dru.showcase.utils.ScheduleUtil;
@@ -47,6 +42,7 @@ public class Showcase {
 	private int size;
 	private float xRotation;
 	private float yRotation;
+	private float zRotation;
 	private float autoRotateSpeed;
 	private ItemDisplay holder;
 	public final static HashMap<Block,Showcase> rotatesInstance = new HashMap<>();
@@ -90,6 +86,7 @@ public class Showcase {
 			size = Math.max(1, con.get(spacedKey(block,"size"), PersistentDataType.INTEGER));
 			xRotation = con.get(spacedKey(block,"rotX"), PersistentDataType.FLOAT);
 			yRotation = con.get(spacedKey(block,"rotY"), PersistentDataType.FLOAT);
+			zRotation = con.get(spacedKey(block,"rotZ"), PersistentDataType.FLOAT);
 			setItemDisplay(me.dru.showcase.EventManager.rotTimes);
 			if(con.has(spacedKey(block,"auto_rotate"),PersistentDataType.FLOAT))
 				autoRotateSpeed = con.get(spacedKey(block,"auto_rotate"), PersistentDataType.FLOAT);
@@ -133,7 +130,7 @@ public class Showcase {
 	
 	public ItemDisplay setItemDisplay(int idx) {
 
-		 List<UUID> items = Arrays.stream(item).filter(id->id!=null).toList();
+		 List<UUID> items = Arrays.stream(item).filter(id->id!=null).collect(Collectors.toList());
 		 
 		 onDisplayItem = items.get(idx%items.size());
 
@@ -143,31 +140,6 @@ public class Showcase {
 			 display.setItemStack(getItemDisplay().getItemStack());
 		 return display;
 	}
-	
-	/*
-	public ItemDisplay setItemDisplay(int idx,boolean checkOld) {
-		
-		ItemDisplay display;
-		ItemDisplay oldDisplay = null;
-		if(checkOld)
-			oldDisplay = getItemDisplay();
-		
-		 List<UUID> items = Arrays.stream(item).filter(id->id!=null).toList();
-		 onDisplayItem = items.get(idx%items.size());
-		 
-		 display = getItemDisplay();
-		 if(oldDisplay==display)
-			 return oldDisplay;
-		setSize(getSize());
-		setRotation(getYawRotation(),getPitchRotation());
-		 if(display!=null)
-			 display.setVisibleByDefault(true);
-		if(checkOld&&oldDisplay!=null) {
-			oldDisplay.setVisibleByDefault(false);	
-		}
-		return display;
-	}
-	*/
 
 	public ItemDisplay getItemDisplay() {
 
@@ -201,7 +173,7 @@ public class Showcase {
 		
 		for(int i=0;i<9;i++) {
 
-			if(!sb.isEmpty())
+			if(sb.length()>0)
 				sb.append("/");
 			UUID id = item[i];
 			if(id!=null&&Bukkit.getEntity(item[i])!=null)
@@ -341,6 +313,16 @@ public class Showcase {
 	public void setPitchRotation(float y) {
 		setRotation(xRotation, y);
 	}
+	
+	public void setRollRotation(float z) {
+		this.zRotation = z;
+		ItemDisplay item = getItemHolder();
+		Transformation transfom = item.getTransformation();
+		transfom.getRightRotation().set(new AxisAngle4f((float)Math.toRadians(z), new Vector3f(0, 0, 1)));
+		
+		item.setTransformation(transfom);
+		getDataContainer().set(spacedKey(block,"rotZ"), PersistentDataType.FLOAT, z);
+	}
 
 	
 	public float getYawRotation() {
@@ -349,6 +331,10 @@ public class Showcase {
 
 	public float getPitchRotation() {
 		return yRotation;
+	}
+
+	public float getRollRotation() {
+		return zRotation;
 	}
 
 	
@@ -401,7 +387,6 @@ public class Showcase {
 		this.size = size;
 		Transformation transform = item.getTransformation();
 		transform.getScale().set(size/config.sizeInterval, size/config.sizeInterval, size/config.sizeInterval);
-		
 		/*
 		getItemDisplays().forEach(i->{
 			i.setTransformation(transform);	
@@ -436,7 +421,7 @@ public class Showcase {
 	
 	
 	public @Nullable Collection<ItemStack> getItems() {
-		return Arrays.stream(item).map(id->id!=null ? ((ItemDisplay)Bukkit.getEntity(id)).getItemStack() :null).toList();
+		return Arrays.stream(item).map(id->id!=null ? ((ItemDisplay)Bukkit.getEntity(id)).getItemStack() :null).collect(Collectors.toList());
 	}
 	public @Nullable ItemStack getItem(int slot) {
 		if(this.item[slot]==null)

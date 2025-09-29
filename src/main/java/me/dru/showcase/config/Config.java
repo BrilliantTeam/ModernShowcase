@@ -35,7 +35,7 @@ public class Config {
 		itemSlotLimit = Math.min(con.getInt("showcase-slots-limit",9), 9);
 		if(con.contains("blackitems"))
 			blackLists = con.getStringList("blackitems").stream()
-				.map(item->Material.matchMaterial(item.toString().toUpperCase())).toList();
+				.map(item->Material.matchMaterial(item.toString().toUpperCase())).collect(Collectors.toList());
 		else 
 			blackLists = Arrays.asList(Material.STRUCTURE_VOID,Material.JIGSAW);
 		

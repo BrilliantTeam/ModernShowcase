@@ -182,6 +182,7 @@ public class ModernShowcase extends JavaPlugin {
 			zh_tw.toggleGlass = "§f§l切換玻璃顯示";
 			zh_tw.yawRotate = "§f§l水平旋轉（X 軸）";
 			zh_tw.pitchRotate = "§f§l垂直旋轉（Y 軸）";
+			zh_tw.zRotate = "§f§l傾斜旋轉（Z 軸）";
 			zh_tw.auto_rotate = "§f§l自動旋轉速度";
 			zh_tw.displayitems = "§f§l展示物品";
 			zh_tw.current = "§6當前設定：{0}";
@@ -241,6 +242,7 @@ public class ModernShowcase extends JavaPlugin {
 			zh_cn.toggleGlass = "§f§l切换玻璃显示";
 			zh_cn.yawRotate = "§f§l水平旋转（X 轴）";
 			zh_cn.pitchRotate = "§f§l垂直旋转（Y 轴）";
+			zh_cn.zRotate = "§f§l倾斜旋转（Z 轴）";
 			zh_cn.auto_rotate = "§f§l自动旋转速度";
 			zh_cn.displayitems = "§f§l显示项目";
 			zh_cn.current = "§6当前设定：{0}";

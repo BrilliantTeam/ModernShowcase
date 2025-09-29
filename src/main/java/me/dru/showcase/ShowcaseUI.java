@@ -61,6 +61,10 @@ public class ShowcaseUI {
 		}), (int)showcase.getPitchRotation(), -180, 180, value->showcase.setPitchRotation(value)));
 		
 		g.addPanel(UIRegion.single(7,0), new IntegerLeverPanel(new StatefulIcon(pp->{
+			return GUILib.getItem(Material.ARROW, lang.zRotate, (int)Math.max(1, Math.abs(showcase.getRollRotation())/10), lang.desc);
+		}), (int)showcase.getRollRotation(), -360, 360, value->showcase.setRollRotation(value)));
+		
+		g.addPanel(UIRegion.single(8,0), new IntegerLeverPanel(new StatefulIcon(pp->{
 			return GUILib.getItem(Material.POWERED_RAIL, lang.auto_rotate, (int)Math.max(1, showcase.getAutoRotateSpeed()*10f), lang.desc);
 		}), (int)(showcase.getAutoRotateSpeed()*10f), -config.maxRotateSpeed, config.maxRotateSpeed, value->showcase.setAutoRotateSpeed(value/10f)));
 		
@@ -110,7 +114,7 @@ public class ShowcaseUI {
 
 	private static HashSet<Inventory> showcases = new HashSet<>();
 	public static void preview(Player p, Showcase showcase) {
-		if(showcase.getItemDisplay()==null) {
+		if(showcase.getItemHolder()==null) {
 			showcase.despawn();
 			return;
 		}

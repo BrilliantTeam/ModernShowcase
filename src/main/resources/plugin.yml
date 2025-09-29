@@ -1,6 +1,6 @@
 name: ModernShowcase
 main: me.dru.showcase.ModernShowcase
-version: 1.7
+version: 1.7.1
 folia-supported: true
 description: "A good showcase plugin"
 author: Dru_TNT
