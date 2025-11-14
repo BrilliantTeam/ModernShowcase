@@ -17,6 +17,7 @@ public class Config {
 	public int rotatePeroid;
 	public int itemSlotLimit;
 	public List<Material> blackLists;
+	public float viewRange=1;
 	File file;
 	FileConfiguration con;
 	public Config() {
@@ -33,6 +34,7 @@ public class Config {
 		rotatePeroid = con.getInt("rotate-ticks-peroid", 2);
 		placedPerChunkLimit = con.getInt("placed-limit-per-chunk",-1);
 		itemSlotLimit = Math.min(con.getInt("showcase-slots-limit",9), 9);
+		viewRange = (float) (Math.max(1, con.getDouble("view-range",80)))/80f;
 		if(con.contains("blackitems"))
 			blackLists = con.getStringList("blackitems").stream()
 				.map(item->Material.matchMaterial(item.toString().toUpperCase())).collect(Collectors.toList());
@@ -57,6 +59,7 @@ public class Config {
 		con.set("rotate-ticks-peroid", rotatePeroid);
 		con.set("showcase-slots-limit", itemSlotLimit);
 		con.set("blackitems", blackLists.stream().map(s->s.name()).collect(Collectors.toList()));
+		con.set("view-range", viewRange*80f);
 		try {
 			con.save(file);
 		} catch (IOException e) {

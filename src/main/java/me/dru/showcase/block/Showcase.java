@@ -83,6 +83,8 @@ public class Showcase {
 					return;
 				}
 			}
+			
+			holder.setViewRange(ModernShowcase.Config().viewRange);
 			size = Math.max(1, con.get(spacedKey(block,"size"), PersistentDataType.INTEGER));
 			xRotation = con.get(spacedKey(block,"rotX"), PersistentDataType.FLOAT);
 			yRotation = con.get(spacedKey(block,"rotY"), PersistentDataType.FLOAT);
@@ -94,6 +96,8 @@ public class Showcase {
 			if(con.has(spacedKey(block,"auto_rotate"),PersistentDataType.FLOAT))
 				autoRotateSpeed = con.get(spacedKey(block,"auto_rotate"), PersistentDataType.FLOAT);
 			tryRegisterMotion();
+			
+			
 		}
 			
 	}
@@ -223,7 +227,8 @@ public class Showcase {
 		}
 		ItemDisplay display = spawn(north, -1, show);
 		display.setVisibleByDefault(true);
-				
+		display.setViewRange(ModernShowcase.Config().viewRange);
+		
 		holder = display;
 		con.set(key, PersistentDataType.STRING, display.getUniqueId().toString());
 		con.set(spacedKey(block.getLocation()), PersistentDataType.STRING, "1");
