@@ -34,12 +34,13 @@ public class ModernShowcase extends JavaPlugin {
 	private static ModernShowcase instance;
 	private static HashMap<String,Lang> langs = new HashMap<>();
 	private CoreProtectAPI coreProtect;
+	private CoreProtectShowcaseAdapter coreProtectAdapter;
 	public Config config;
 	@Override
 	public void onEnable() {
 		instance = this;
-		coreProtect = searchCoreProtect();
 		registerConfig();
+		registerCoreProtect();
 		registerLangs();
 		registerEvents();
 		registerCommands();
@@ -63,6 +64,11 @@ public class ModernShowcase extends JavaPlugin {
 		});
 	}
 
+	private void registerCoreProtect() {
+		coreProtect = searchCoreProtect();
+		coreProtectAdapter = new CoreProtectShowcaseAdapter(coreProtect); 
+	}
+
 	private void registerConfig() {
 		config = new Config();
 	}
@@ -75,7 +81,7 @@ public class ModernShowcase extends JavaPlugin {
 		return instance;
 	}
 	public CoreProtectShowcaseAdapter getCoreProtect() {
-		return coreProtect != null ? new CoreProtectShowcaseAdapter(coreProtect) : null;
+		return coreProtectAdapter;
 	}
 	private CoreProtectAPI searchCoreProtect() {
         Plugin plugin = getServer().getPluginManager().getPlugin("CoreProtect");
@@ -97,7 +103,7 @@ public class ModernShowcase extends JavaPlugin {
         }
         Bukkit.getLogger().info("[ModerenShowcase] CoreProtect detected, hooked successfully.");
         return CoreProtect;
-}
+	}
 	private void registerBstats() {
 		int pluginId = 20936;
         new Metrics(this, pluginId);
@@ -141,7 +147,7 @@ public class ModernShowcase extends JavaPlugin {
 			recipe.setIngredient('b', Material.ITEM_FRAME);
 			Bukkit.addRecipe(recipe);
 			glassRecipes.add(recipe);
-		});
+		});		
 		
 	}
 	
@@ -180,6 +186,10 @@ public class ModernShowcase extends JavaPlugin {
 			zh_tw.scale = "§f§l大小縮放";
 			zh_tw.toggleFixed = "§f§l切換固定顯示";
 			zh_tw.toggleGlass = "§f§l切換玻璃顯示";
+			zh_tw.canPreview = "§f§l可點擊預覽";
+			zh_tw.xOffest = "§f§lX偏移位置";
+			zh_tw.yOffest = "§f§lY偏移位置";
+			zh_tw.zOffest = "§f§lZ偏移位置";
 			zh_tw.yawRotate = "§f§l水平旋轉（X 軸）";
 			zh_tw.pitchRotate = "§f§l垂直旋轉（Y 軸）";
 			zh_tw.zRotate = "§f§l傾斜旋轉（Z 軸）";
@@ -198,7 +208,9 @@ public class ModernShowcase extends JavaPlugin {
 				    zh_tw.current,
 				    ChatColor.GRAY+"    ",
 				    ChatColor.GRAY+"    右鍵 §7+ 1    ",
-				    ChatColor.GRAY+"    左鍵 §7- 1    ",                   
+				    ChatColor.GRAY+"    左鍵 §7- 1    ",          
+				    ChatColor.GRAY+"    Shift 右鍵 + 10ﾟ    ",                  
+				    ChatColor.GRAY+"    Shift 左鍵 - 10ﾟ    ",             
 				    ChatColor.GRAY+"    ");
 			zh_tw.enable = "§a啟用";
 			zh_tw.disable = "§c停用";
@@ -240,6 +252,10 @@ public class ModernShowcase extends JavaPlugin {
 			zh_cn.scale = "§f§l大小缩放";
 			zh_cn.toggleFixed = "§f§l切换固定显示";
 			zh_cn.toggleGlass = "§f§l切换玻璃显示";
+			zh_cn.canPreview = "§f§l可点击预览";
+			zh_cn.xOffest = "§f§lX偏移位置";
+			zh_cn.yOffest = "§f§lY偏移位置";
+			zh_cn.zOffest = "§f§lZ偏移位置";
 			zh_cn.yawRotate = "§f§l水平旋转（X 轴）";
 			zh_cn.pitchRotate = "§f§l垂直旋转（Y 轴）";
 			zh_cn.zRotate = "§f§l倾斜旋转（Z 轴）";
@@ -258,7 +274,9 @@ public class ModernShowcase extends JavaPlugin {
 					zh_cn.current,
 				    ChatColor.GRAY+"    ",
 				    ChatColor.GRAY+"    右键 §7+ 1    ",
-				    ChatColor.GRAY+"    左键 §7- 1    ",                   
+				    ChatColor.GRAY+"    左键 §7- 1    ",                 
+				    ChatColor.GRAY+"    Shift 右键 + 10    ",                  
+				    ChatColor.GRAY+"    Shift 左键 - 10    ",       
 				    ChatColor.GRAY+"    ");
 			zh_cn.enable = "§a启用";
 			zh_cn.disable = "§c停用";

@@ -18,13 +18,18 @@ public class Lang {
 	public String settingTitle = "Showcase settings";
 	public String scale = "§r§fScale Size";
 	public String current = ChatColor.GOLD+"Current: {0}";
-	public String toggleFixed = "§rToggle Fixed Display";
-	public String toggleGlass = "§rToggle Glass Display";
+	public String toggleFixed = "§r§fToggle Fixed Display";
+	public String toggleGlass = "§r§fToggle Glass Display";
+	public String canPreview = "§r§fCan Preview";
 	public String yawRotate = "§r§fYaw Direction";
 	public String pitchRotate = "§r§fPitch Direction";
 	public String zRotate = "§r§fRoll Direction";
 	public String auto_rotate = "§r§fAuto Rotation Speed";
 	public String displayitems = "§r§fDisplay Items";
+
+	public String xOffest = "§r§fX Offest";
+	public String yOffest = "§r§fY Offest";
+	public String zOffest = "§r§fZ Offest";
 
 	public List<String> desc = Arrays.asList(
 			current,
@@ -36,7 +41,8 @@ public class Lang {
 			current,
 			" ",
 			ChatColor.GRAY+"Right click to +1",
-			ChatColor.GRAY+"Left click to -1");
+			ChatColor.GRAY+"Left click to -1",
+			ChatColor.GRAY+"Hold Shift = 10");
 	public String enable = ChatColor.GREEN+ "Enable";
 	public String disable = ChatColor.RED+ "Disable";
 	
@@ -78,6 +84,10 @@ public class Lang {
 		current  = config.getString("current_value",current);
 		toggleFixed  = config.getString("toggle_fixed",toggleFixed);
 		toggleGlass  = config.getString("toggle_glass",toggleGlass);
+		canPreview = config.getString("can_preview",canPreview);
+		xOffest = config.getString("x_offest",xOffest);
+		yOffest = config.getString("y_offest",yOffest);
+		zOffest = config.getString("z_offest",zOffest);
 		yawRotate  = config.getString("yaw_direction",yawRotate);
 		pitchRotate  = config.getString("pitch_direction",pitchRotate);
 		zRotate  = config.getString("roll_direction",zRotate);
@@ -128,6 +138,11 @@ public class Lang {
 		config.set("current_value",current);
 		config.set("toggle_fixed",toggleFixed);
 		config.set("toggle_glass",toggleGlass);
+
+		config.set("can_preview", canPreview);
+		config.set("x_offest", xOffest);
+		config.set("y_offest", yOffest);
+		config.set("z_offest", zOffest);
 		config.set("yaw_direction",yawRotate);
 		config.set("pitch_direction",pitchRotate);
 		config.set("roll_direction",zRotate);

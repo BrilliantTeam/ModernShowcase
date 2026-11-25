@@ -40,10 +40,11 @@ public class Showcase {
 	private UUID[] item = new UUID[9];
 	private UUID onDisplayItem;
 	private int size;
-	private float xRotation;
-	private float yRotation;
-	private float zRotation;
+	private float xRotation, xOffest;
+	private float yRotation, yOffest;
+	private float zRotation, zOffest;
 	private float autoRotateSpeed;
+	private boolean canPreview = true;
 	private ItemDisplay holder;
 	public final static HashMap<Block,Showcase> rotatesInstance = new HashMap<>();
 	
@@ -91,6 +92,15 @@ public class Showcase {
 			
 			if(con.has(spacedKey(block,"rotZ"),PersistentDataType.FLOAT))
 				zRotation = con.get(spacedKey(block,"rotZ"), PersistentDataType.FLOAT);
+			
+			if(con.has(spacedKey(block,"posX"),PersistentDataType.FLOAT))
+				xOffest = con.get(spacedKey(block,"posX"), PersistentDataType.FLOAT);
+			if(con.has(spacedKey(block,"posY"),PersistentDataType.FLOAT))
+				yOffest = con.get(spacedKey(block,"posY"), PersistentDataType.FLOAT);
+			if(con.has(spacedKey(block,"posZ"),PersistentDataType.FLOAT))
+				zOffest = con.get(spacedKey(block,"posZ"), PersistentDataType.FLOAT);
+			if(con.has(spacedKey(block,"can_preview"),PersistentDataType.BOOLEAN))
+				canPreview = con.get(spacedKey(block,"can_preview"), PersistentDataType.BOOLEAN);
 			
 			setItemDisplay(me.dru.showcase.EventManager.rotTimes);
 			if(con.has(spacedKey(block,"auto_rotate"),PersistentDataType.FLOAT))
@@ -180,7 +190,7 @@ public class Showcase {
 		
 		for(int i=0;i<9;i++) {
 
-			if(sb.length()>0)
+			if(i>0)
 				sb.append("/");
 			UUID id = item[i];
 			if(id!=null&&Bukkit.getEntity(item[i])!=null)
@@ -282,7 +292,9 @@ public class Showcase {
 				holder.remove();
 			rotatesInstance.remove(block);
 			Arrays.stream(item).filter(id->id!=null).map(id->(ItemDisplay)Bukkit.getEntity(id)).forEach(id->{
-				id.getWorld().dropItem(id.getLocation(), id.getItemStack());
+				if(!id.getItemStack().getItemMeta().getPersistentDataContainer().has(
+						new NamespacedKey(ModernShowcase.getInstance(), "Temp"), PersistentDataType.BOOLEAN))
+					id.getWorld().dropItem(id.getLocation(), id.getItemStack());
 				id.remove();
 			});
 				
@@ -332,7 +344,54 @@ public class Showcase {
 		getDataContainer().set(spacedKey(block,"rotZ"), PersistentDataType.FLOAT, z);
 	}
 
-	
+	public void setXOffest(float x) {
+		PersistentDataContainer con = getDataContainer();
+		ItemDisplay item = getItemHolder();
+		xOffest = x;
+		
+		Transformation transfom = item.getTransformation();
+		Vector3f vec =  transfom.getTranslation();
+		vec.x = x;
+		item.setTransformation(transfom);
+		con.set(spacedKey(block,"posX"), PersistentDataType.FLOAT, x);
+	}
+
+	public void setYOffest(float y) {
+		PersistentDataContainer con = getDataContainer();
+		ItemDisplay item = getItemHolder();
+		yOffest = y;
+		
+		Transformation transfom = item.getTransformation();
+		Vector3f vec =  transfom.getTranslation();
+		vec.y = y;
+		item.setTransformation(transfom);
+		con.set(spacedKey(block,"posY"), PersistentDataType.FLOAT, y);
+	}
+
+	public void setZOffest(float z) {
+		PersistentDataContainer con = getDataContainer();
+		ItemDisplay item = getItemHolder();
+		zOffest = z;
+		
+		Transformation transfom = item.getTransformation();
+		Vector3f vec =  transfom.getTranslation();
+		vec.z = z;
+		item.setTransformation(transfom);
+		con.set(spacedKey(block,"posZ"), PersistentDataType.FLOAT, z);
+	}
+
+	public float getXOffest() {
+		return xOffest;
+	}
+
+	public float getYOffest() {
+		return yOffest;
+	}
+
+	public float getZOffest() {
+		return zOffest;
+	}
+
 	public float getYawRotation() {
 		return xRotation;
 	}
@@ -362,6 +421,17 @@ public class Showcase {
 	
 	public boolean isFixedBillboard() {
 		return getItemHolder().getBillboard()==Billboard.FIXED;
+	}
+	
+	
+	public void setCanPreivew(boolean can) {
+		canPreview = can;
+		PersistentDataContainer con = getDataContainer();
+		con.set(spacedKey(block, "can_preview"),PersistentDataType.BOOLEAN, can);
+	}
+	
+	public boolean canPreivew() {
+		return canPreview;
 	}
 
 	public void togglgGlass() {

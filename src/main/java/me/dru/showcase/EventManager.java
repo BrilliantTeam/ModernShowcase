@@ -7,9 +7,9 @@ import java.util.HashSet;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemDisplay;
@@ -29,22 +29,23 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.event.world.EntitiesUnloadEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Transformation;
-import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 
 
 import me.dru.showcase.block.Showcase;
+import me.dru.showcase.config.Config;
 import me.dru.showcase.utils.CoreProtectShowcaseAdapter;
 
 public class EventManager implements Listener {
@@ -87,16 +88,31 @@ public class EventManager implements Listener {
 			Showcase.addPlacedAmountOnChunk(e.getBlock().getChunk(), 1);
 			Location loc = e.getBlock().getLocation().subtract(e.getPlayer().getLocation());
 			Showcase show = Showcase.get(e.getBlock().getLocation());
-			show.spawnHolder(Math.abs(loc.getX())<Math.abs(loc.getZ()),new ItemStack(Material.ITEM_FRAME));
+			ItemStack item = new ItemStack(Material.ITEM_FRAME);
+			ItemMeta im = item.getItemMeta();
+			PersistentDataContainer con = im.getPersistentDataContainer();
+			con.set(new NamespacedKey(ModernShowcase.getInstance(), "Temp"), PersistentDataType.BOOLEAN, true);
+			item.setItemMeta(im);
+			show.spawnHolder(Math.abs(loc.getX())<Math.abs(loc.getZ()),item);
 		}
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onBreak(BlockBreakEvent e) {
 		if(!e.isCancelled()&&Showcase.isShowcase(e.getBlock().getLocation())) {
+			Material type = e.getBlock().getType();
 			Showcase showcase = Showcase.get(e.getBlock().getLocation());
 			Showcase.addPlacedAmountOnChunk(e.getBlock().getChunk(), -1);
 			showcase.despawn();
+			
+			Config config = ModernShowcase.Config();
+			if(config.dropShowcase||(config.silkDropshowcase&&e.getPlayer().getInventory()
+					.getItemInMainHand().containsEnchantment(Enchantment.SILK_TOUCH))) {
+				ItemStack drop = ModernShowcase.getInstance().getShowcaseItem(ModernShowcase.getLang(e.getPlayer()), type);
+
+				if(drop!=null)
+					e.getBlock().getWorld().dropItem(e.getBlock().getLocation().add(0.5,0.5,0.5), drop);
+			} 
 		}
 	}
 	
@@ -107,68 +123,33 @@ public class EventManager implements Listener {
 		if(e!=dependCheck&&e.getHand()!=EquipmentSlot.OFF_HAND&&e.getAction()==Action.RIGHT_CLICK_BLOCK&&Showcase.isShowcase(e.getClickedBlock().getLocation())) {
 			e.setCancelled(true);
 			
-			if((coreProtect!=null&&coreProtect.isInspecting(e.getPlayer())))
+			if((coreProtect.isInspecting(e.getPlayer())))
 				return;
 			Showcase showcase = Showcase.get(e.getClickedBlock().getLocation());
 			
+			boolean isPreview = !e.getPlayer().isSneaking()||!e.getPlayer().hasPermission("modernshowcase.edit");
+			if(isPreview) {
+				if(showcase.canPreivew())
+					ShowcaseUI.preview(e.getPlayer(), showcase);
+				return;
+			}
+			
 			Material origianl = e.getClickedBlock().getType();
+			if(origianl==Material.CHEST)
+				return; 
 			e.getClickedBlock().setType(Material.CHEST);
 			PlayerInteractEvent interact = new PlayerInteractEvent(e.getPlayer(), Action.RIGHT_CLICK_BLOCK,e.getItem(), e.getClickedBlock(), e.getBlockFace(), e.getHand());
 			dependCheck = interact;
 			Bukkit.getPluginManager().callEvent(interact);
 			
-			if(!e.getPlayer().isSneaking()||
-					interact.useInteractedBlock()==Result.DENY||!e.getPlayer().hasPermission("modernshowcase.edit")) { 
-				ShowcaseUI.preview(e.getPlayer(), showcase);
+			if(interact.useInteractedBlock()==Result.DENY) {
+				if(showcase.canPreivew())
+					ShowcaseUI.preview(e.getPlayer(), showcase);
 			} else 
 				ShowcaseUI.open(e.getPlayer(), showcase);
 			if(e.getClickedBlock().getType()==Material.CHEST)
 				e.getClickedBlock().setType(origianl);
 			
-			/*
-			 * if(e.getPlayer().isSneaking()&&e.getItem()!=null&&Showcase.isShowcase(e.getItem())) {
-				return;
-			}
-			e.setCancelled(true);
-			
-			 * Material origianl = e.getClickedBlock().getType();
-			e.getClickedBlock().setType(Material.CHEST);
-			
-			boolean sneak = e.getPlayer().isSneaking();
-			if(sneak)
-				e.getPlayer().setSneaking(false);
-			e.getPlayer().setSneaking(false);
-			PlayerInteractEvent interact = new PlayerInteractEvent(e.getPlayer(), Action.RIGHT_CLICK_BLOCK,e.getItem(), e.getClickedBlock(), e.getBlockFace(), e.getHand());
-			dependCheck = interact;
-			Bukkit.getPluginManager().callEvent(interact);
-			if(sneak) {
-				if(interact.useInteractedBlock()!=Result.DENY) 
-					ShowcaseUI.open(e.getPlayer(), showcase);
-				else 
-					ShowcaseUI.preview(e.getPlayer(), showcase);
-					
-				e.getClickedBlock().setType(origianl);
-				return;
-			}
-			
-			if(e.getItem()!=null&&interact.useInteractedBlock()!=Result.DENY) {
-				if(coreProtect!=null)
-					coreProtect.logShowcase(e.getPlayer(),((Chest)e.getClickedBlock().getState()),showcase.getItem(),e.getItem());
-				if(e.getPlayer().getInventory().firstEmpty()>=0)
-					e.getPlayer().getInventory().addItem(showcase.getItem());
-				else
-					e.getPlayer().getWorld().dropItem(e.getPlayer().getLocation(), showcase.getItem(),i->i.setPickupDelay(0));
-
-				showcase.setItem(e.getItem());	
-				e.getPlayer().getInventory().setItem(EquipmentSlot.HAND, new ItemStack(Material.AIR));
-				e.getPlayer().getWorld().playSound(e.getPlayer().getLocation(),Sound.ITEM_ARMOR_EQUIP_LEATHER,1f,1f);
-				
-			} else {
-				ShowcaseUI.preview(e.getPlayer(),showcase);
-			}
-			e.getClickedBlock().setType(origianl);
-			*/
-
 		}
 	}
 

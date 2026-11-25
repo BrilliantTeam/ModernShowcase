@@ -1,38 +1,30 @@
 package me.dru.showcase.utils;
 
-import java.sql.Connection;
-import java.sql.Statement;
-import java.util.List;
-
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
-import org.bukkit.block.DoubleChest;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import me.dru.showcase.ModernShowcase;
+import me.dru.showcase.config.Config;
 import net.coreprotect.CoreProtectAPI;
-import net.coreprotect.config.Config;
 import net.coreprotect.config.ConfigHandler;
-import net.coreprotect.database.Database;
-import net.coreprotect.database.lookup.ChestTransactionLookup;
-import net.coreprotect.language.Phrase;
 import net.coreprotect.model.BlockGroup;
-import net.coreprotect.utility.Chat;
-import net.coreprotect.utility.Color;
 
 public class CoreProtectShowcaseAdapter {
 	CoreProtectAPI coreProtect;
 	
+	Config config;
+	
 	public CoreProtectShowcaseAdapter(CoreProtectAPI coreProtect) {
 		this.coreProtect = coreProtect;
+		this.config = ModernShowcase.Config();
+		if(!config.enableCoreProtectLog||coreProtect==null)
+			return;
 	    BlockGroup.CONTAINERS.add(Material.GLASS);
 	    BlockGroup.CONTAINERS.add(Material.TINTED_GLASS);
 	    BlockGroup.CONTAINERS.add(Material.WHITE_STAINED_GLASS);
@@ -57,15 +49,29 @@ public class CoreProtectShowcaseAdapter {
 
 
 	public boolean isInspecting(Player player) {
+		if(coreProtect==null)
+			return false;
 		return Boolean.TRUE.equals(ConfigHandler.inspecting.get(player.getName()));
 	}
-	public void logShowcase(Player player,Chest chest,ItemStack from, @Nullable ItemStack to) {
-		if(coreProtect==null)
+	public void logShowcase(Player player,Block block,ItemStack from, @Nullable ItemStack to) {
+		if(coreProtect==null||!config.enableCoreProtectLog)
 			return;
-		Inventory inv = chest.getInventory();
-		inv.addItem(from);
+		Material type = block.getType();
+		block.setType(Material.CHEST,false);							
+		Inventory inv = ((Chest)block.getState()).getInventory();
+		if(from!=null)
+			inv.addItem(from);										 
 		coreProtect.logContainerTransaction(player.getName(), inv.getLocation());
-		inv.remove(from);
-		inv.addItem(to);
+		if(from!=null)
+			inv.remove(from);
+		if(to!=null)
+			inv.addItem(to);
+		//player.sendBlockChange(block.getLocation(), type.createBlockData());
+		//Bukkit.getScheduler().runTaskLater(ModernShowcase.getInstance(), ()->{
+		//	inv.clear();
+		block.setType(type,false);	
+		//},5);
+		
+		//block.setType(type,false);
 	}
 }

@@ -17,7 +17,10 @@ public class Config {
 	public int rotatePeroid;
 	public int itemSlotLimit;
 	public List<Material> blackLists;
+	public boolean enableCoreProtectLog;
+	public boolean dropShowcase, silkDropshowcase;
 	public float viewRange=1;
+	public float maxOffest=50f;
 	File file;
 	FileConfiguration con;
 	public Config() {
@@ -28,13 +31,20 @@ public class Config {
 		file = new File("plugins/ModernShowcase/Config.yml");
 		con = YamlConfiguration.loadConfiguration(file);
 		sizeInterval = (float) con.getDouble("size-interval",8);
+		//offestInterval
 		maxSize = con.getInt("max-size", 10);
 		minSize = con.getInt("min-size", 1);
+		maxOffest = (float)con.getDouble("max-offest",50);
+		
 		maxRotateSpeed = con.getInt("max-rotate-speed", 25);
 		rotatePeroid = con.getInt("rotate-ticks-peroid", 2);
 		placedPerChunkLimit = con.getInt("placed-limit-per-chunk",-1);
 		itemSlotLimit = Math.min(con.getInt("showcase-slots-limit",9), 9);
 		viewRange = (float) (Math.max(1, con.getDouble("view-range",80)))/80f;
+		dropShowcase = con.getBoolean("drop-showcase", false);
+		silkDropshowcase = con.getBoolean("silk-drop-showcase", true);
+		
+		enableCoreProtectLog = con.getBoolean("enable-core-protect-log", true);
 		if(con.contains("blackitems"))
 			blackLists = con.getStringList("blackitems").stream()
 				.map(item->Material.matchMaterial(item.toString().toUpperCase())).collect(Collectors.toList());
@@ -54,12 +64,18 @@ public class Config {
 		con.set("size-interval", sizeInterval);
 		con.set("max-size", maxSize);
 		con.set("min-size", minSize);
+		con.set("max-offest", maxOffest);
 		con.set("placed-limit-per-chunk", placedPerChunkLimit);
 		con.set("max-rotate-speed", maxRotateSpeed);
 		con.set("rotate-ticks-peroid", rotatePeroid);
 		con.set("showcase-slots-limit", itemSlotLimit);
 		con.set("blackitems", blackLists.stream().map(s->s.name()).collect(Collectors.toList()));
 		con.set("view-range", viewRange*80f);
+		con.set("drop-showcase", dropShowcase);
+		con.set("silk-drop-showcase", silkDropshowcase);
+		con.set("enable-core-protect-log", enableCoreProtectLog);
+		
+
 		try {
 			con.save(file);
 		} catch (IOException e) {
