@@ -62,16 +62,9 @@ public class CoreProtectShowcaseAdapter {
 		if(from!=null)
 			inv.addItem(from);										 
 		coreProtect.logContainerTransaction(player.getName(), inv.getLocation());
-		if(from!=null)
-			inv.remove(from);
+		inv.clear();
+		block.setType(type,false);
 		if(to!=null)
 			inv.addItem(to);
-		//player.sendBlockChange(block.getLocation(), type.createBlockData());
-		//Bukkit.getScheduler().runTaskLater(ModernShowcase.getInstance(), ()->{
-		//	inv.clear();
-		block.setType(type,false);	
-		//},5);
-		
-		//block.setType(type,false);
 	}
 }

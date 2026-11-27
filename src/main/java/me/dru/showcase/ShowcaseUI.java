@@ -1,5 +1,6 @@
 package me.dru.showcase;
 
+import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
@@ -173,6 +174,7 @@ public class ShowcaseUI {
 			return;
 		}
 		Inventory inv = Bukkit.createInventory(null,InventoryType.DISPENSER," ");
+		moveToPlayer(inv, p);
 		for(int i=0;i<9;i++) {
 			ItemStack item = showcase.getItem(i);
 			if(item!=null)
@@ -180,6 +182,21 @@ public class ShowcaseUI {
 		}
 		showcases.add(inv);
 		p.openInventory(inv);
+	}
+
+	private static void moveToPlayer(Inventory inv, Player p) {
+		try {
+			Object container = inv.getClass().getMethod("getInventory").invoke(inv);
+			Class<?> blockPos = Class.forName("net.minecraft.core.BlockPos");
+			Field position = Class.forName("net.minecraft.world.level.block.entity.BlockEntity").getDeclaredField("worldPosition");
+			if(!position.getDeclaringClass().isInstance(container))
+				return;
+			position.setAccessible(true);
+			position.set(container, blockPos.getConstructor(int.class, int.class, int.class)
+					.newInstance(p.getLocation().getBlockX(), p.getLocation().getBlockY(), p.getLocation().getBlockZ()));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			ModernShowcase.getInstance().getLogger().warning("Cannot move preview inventory to player: " + e);
+		}
 	}
 	
 	public static boolean isPreviewInventory(Inventory inventory) {
