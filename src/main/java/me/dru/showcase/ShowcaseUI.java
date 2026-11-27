@@ -1,5 +1,6 @@
 package me.dru.showcase;
 
+import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
@@ -28,6 +29,7 @@ import dr.dru.gui.component.position.UIRegion;
 import me.dru.showcase.block.Showcase;
 import me.dru.showcase.config.Config;
 import me.dru.showcase.utils.CoreProtectShowcaseAdapter;
+import me.dru.showcase.utils.ScheduleUtil;
 
 public class ShowcaseUI {
 	
@@ -173,6 +175,8 @@ public class ShowcaseUI {
 			return;
 		}
 		Inventory inv = Bukkit.createInventory(null,InventoryType.DISPENSER," ");
+		if(ScheduleUtil.isFolia())
+			moveToPlayer(inv, p);
 		for(int i=0;i<9;i++) {
 			ItemStack item = showcase.getItem(i);
 			if(item!=null)
@@ -180,6 +184,17 @@ public class ShowcaseUI {
 		}
 		showcases.add(inv);
 		p.openInventory(inv);
+	}
+
+	private static void moveToPlayer(Inventory inv, Player p) {
+		try {
+			Block b = p.getLocation().getBlock();
+			Field position = Class.forName("net.minecraft.world.level.block.entity.BlockEntity").getDeclaredField("worldPosition");
+			position.setAccessible(true);
+			position.set(inv.getClass().getMethod("getInventory").invoke(inv), Class.forName("net.minecraft.core.BlockPos")
+					.getConstructor(int.class, int.class, int.class).newInstance(b.getX(), b.getY(), b.getZ()));
+		} catch (ReflectiveOperationException | RuntimeException ignored) {
+		}
 	}
 	
 	public static boolean isPreviewInventory(Inventory inventory) {
