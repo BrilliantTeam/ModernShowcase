@@ -29,6 +29,7 @@ import dr.dru.gui.component.position.UIRegion;
 import me.dru.showcase.block.Showcase;
 import me.dru.showcase.config.Config;
 import me.dru.showcase.utils.CoreProtectShowcaseAdapter;
+import me.dru.showcase.utils.ScheduleUtil;
 
 public class ShowcaseUI {
 	
@@ -174,7 +175,8 @@ public class ShowcaseUI {
 			return;
 		}
 		Inventory inv = Bukkit.createInventory(null,InventoryType.DISPENSER," ");
-		moveToPlayer(inv, p);
+		if(ScheduleUtil.isFolia())
+			moveToPlayer(inv, p);
 		for(int i=0;i<9;i++) {
 			ItemStack item = showcase.getItem(i);
 			if(item!=null)
@@ -186,16 +188,12 @@ public class ShowcaseUI {
 
 	private static void moveToPlayer(Inventory inv, Player p) {
 		try {
-			Object container = inv.getClass().getMethod("getInventory").invoke(inv);
-			Class<?> blockPos = Class.forName("net.minecraft.core.BlockPos");
+			Block b = p.getLocation().getBlock();
 			Field position = Class.forName("net.minecraft.world.level.block.entity.BlockEntity").getDeclaredField("worldPosition");
-			if(!position.getDeclaringClass().isInstance(container))
-				return;
 			position.setAccessible(true);
-			position.set(container, blockPos.getConstructor(int.class, int.class, int.class)
-					.newInstance(p.getLocation().getBlockX(), p.getLocation().getBlockY(), p.getLocation().getBlockZ()));
-		} catch (ReflectiveOperationException | RuntimeException e) {
-			ModernShowcase.getInstance().getLogger().warning("Cannot move preview inventory to player: " + e);
+			position.set(inv.getClass().getMethod("getInventory").invoke(inv), Class.forName("net.minecraft.core.BlockPos")
+					.getConstructor(int.class, int.class, int.class).newInstance(b.getX(), b.getY(), b.getZ()));
+		} catch (ReflectiveOperationException | RuntimeException ignored) {
 		}
 	}
 	
